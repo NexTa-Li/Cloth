@@ -1,4 +1,4 @@
-# Cloth
+# Cloth with Ray Tracing
 
 ## Description
 
