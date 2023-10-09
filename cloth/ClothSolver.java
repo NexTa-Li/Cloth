@@ -39,17 +39,15 @@ public class ClothSolver {
     }
 
     public void update(double dt, Vector3D wind) {
-        maintainLength();
-        accelerate(Config.GRAVITY);
-        accelerateRand(wind);
+
         accumulateSpringForce();
+        accelerateRand(wind);
+        // wind.add();
 
         for (int i = 0; i < points.size(); i++) {
-
+            points.get(i).force.add(Config.GRAVITY); // accelerate
             points.get(i).update(dt);
-
         }
-
     }
 
     void accumulateSpringForce() {
@@ -91,15 +89,54 @@ public class ClothSolver {
                 points.get(p1).force.sub(forceVector);
                 points.get(p2).force.add(forceVector);
             }
+
+            // check if distance != than rest length
+
+            if (distance != springs.get(i).restLen) {
+                // calculate force
+
+                // find the difference in positions between the two points
+                double diffX = x1 - x2;
+                double diffY = y1 - y2;
+                double diffZ = z1 - z2;
+                double moveAmount = (springs.get(i).restLen - distance);
+                // find the unit vector of the vector between the two points
+                Vector3D unitVector = new Vector3D(diffX, diffY, diffZ);
+                unitVector.normalize();
+
+                // find the amount to move each point
+
+                // scale the unit vector by the move amount
+                unitVector.scale(moveAmount);
+
+                // move the points
+                if (points.get(springs.get(i).p2).pinned) {
+                    points.get(p1).position.add(unitVector);
+                    continue;
+                }
+
+                if (points.get(springs.get(i).p1).pinned) {
+                    points.get(p2).position.sub(unitVector);
+                    continue;
+                }
+
+                unitVector.scale(0.5);
+
+                points.get(p1).position.add(unitVector);
+                points.get(p2).position.sub(unitVector);
+            }
         }
     }
 
     public void accelerate(Vector3D acceleration) {
         for (int i = 0; i < points.size(); i++) {
             points.get(i).force.add(acceleration);
+        }
+    }
 
-            // keep track of average z
-
+    public void accelerateTop(Vector3D acceleration) {
+        for (int i = 0; i < cloth.cols; i++) {
+            points.get(i + 2 * cloth.cols).force.add(acceleration);
         }
     }
 
@@ -121,6 +158,9 @@ public class ClothSolver {
                 double windZ = wind.z * Math.sin(randMult); // wind.z * Math.sin(((j + i) % (Math.PI * 2)) / (Math.PI -
                 // 180));
                 wind2.setZ(windZ);
+
+                double windY = wind.y * Math.sin(randMult);
+                wind2.setY(windY);
 
                 wind2.scale(randMult);
 
@@ -147,43 +187,7 @@ public class ClothSolver {
             z2 = points.get(p2).position.z;
 
             // calculate distance, This is current length of spring
-            distance = points.get(p1).position.distance(points.get(p2).position);
 
-            // check if distance != than rest length
-
-            if (distance != springs.get(i).restLen) {
-                // calculate force
-
-                // find the difference in positions between the two points
-                double diffX = x1 - x2;
-                double diffY = y1 - y2;
-                double diffZ = z1 - z2;
-                double moveAmount = (springs.get(i).restLen - distance) / 2;
-                // find the unit vector of the vector between the two points
-                Vector3D unitVector = new Vector3D(diffX, diffY, diffZ);
-                unitVector.normalize();
-
-                // find the amount to move each point
-
-                // scale the unit vector by the move amount
-                unitVector.scale(moveAmount);
-
-                // move the points
-                if (points.get(springs.get(i).p2).pinned && !points.get(springs.get(i).p1).pinned) {
-                    unitVector.scale(2);
-                    points.get(p1).position.add(unitVector);
-                    break;
-                }
-
-                if (points.get(springs.get(i).p1).pinned && !points.get(springs.get(i).p2).pinned) {
-                    unitVector.scale(2);
-                    points.get(p2).position.sub(unitVector);
-                    break;
-                }
-
-                points.get(p1).position.add(unitVector);
-                points.get(p2).position.sub(unitVector);
-            }
         }
     }
 }

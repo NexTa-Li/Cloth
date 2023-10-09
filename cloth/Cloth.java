@@ -38,27 +38,26 @@ public class Cloth {
             for (int j = 0; j < cols; j++) {
                 double px = x + j * restLength;
 
-                Point p = new Point(px, py, 70);
+                Point p = new Point(px, py, 0);
 
                 // pin the top row
-                // if (i == 0) {
+                // if (i == 0 && j == cols / 2) { //
                 // p.pinned = true;
                 // }
 
-                if (i == 0 && j == 0 || i == 0 && j == cols - 1 || i == 0 && j == cols / 2) { //
+                if (i == 0 && j == 0 || i == 0 && j == cols - 1) {// || i == 0 && j == cols / 2
+                    //
                     p.pinned = true;
                 }
-
-                // if (i == 0 && j % 30 == 0) {
-                // p.pinned = true;
-                // }
 
                 // pin bottom two corners
                 if (i == rows - 1 && j == 0 || i == rows - 1 && j == cols - 1) {
 
                     p.pinned = true;
                 }
-
+                // if (i == 0 && j % 30 == 0) {
+                // p.pinned = true;
+                // }
                 points.add(p);
 
                 // horizontal structural springs

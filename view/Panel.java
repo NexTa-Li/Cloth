@@ -25,122 +25,80 @@ public class Panel extends JPanel implements Runnable, Config {
     Cloth cloth;
     ClothSolver clothSolver;
 
+    int rows;
+    int cols;
+
+    int sx;
+    int sy;
+    int restLength;
+
+    int shift;
     Thread thread;
+    Vector3D light;
+    Point3D camera;
+    int count = 0;
+    Color color = new Color(255, 215, 0);
 
-    public Panel() {
+    public Panel(Main main) {
         this.setPreferredSize(new Dimension(PANEL_WIDTH, PANEL_HEIGHT));
-
-        this.cloth = new Cloth(250, 150, 20, 60, 15, 100, 10000);
-        this.clothSolver = new ClothSolver(cloth.points, cloth.springs, cloth);
-
         this.setBackground(Color.black);
         this.setFocusable(true);
         this.requestFocus();
+
+        this.rows = main.rows;
+        this.cols = main.cols;
+        this.restLength = main.restLength;
+        this.sx = main.sx;
+        this.sy = main.sy;
+
+        this.shift = sx - 150;
+        this.cloth = main.cloth;
+        this.clothSolver = main.clothSolver;
+        this.light = main.light;
+        this.camera = main.camera;
 
         thread = new Thread(this);
         thread.start();
     }
 
-    int count = 0;
-    int target = 1400;
-    double x = 0.00;
-    double y = -0.0;
-    double z = 2.01;
-
-    void idle() {
-
-        if (count == target) {
-            x *= -1;
-
-            z *= -1;
-            y *= -1;
-
-            // if (Math.abs(z) < 2) {
-            // z *= 1.5;
-            // } else {
-            // z = 1.0;
-            // }
-            count = 0;
-            // target = (int) (Math.random() * 500 + 1000);
-        }
-
-        Vector3D wind = new Vector3D(x, 0, z);
-        // clothSolver.accelerate(new Vector3D(x, 0, 0));
-        clothSolver.update(8, timestep, wind);
-        count++;
-    }
-
     @Override
     public void run() {
-        try {
-            Thread.sleep(100);
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
 
+        long cnt = 0;
         double drawInterval = 1000000000 / TICKRATE;
         double delta = 0;
         long lastTime = System.nanoTime();
         long currentTime;
 
-        long timer = 0;
-        int drawCount = 0;
-
         while (thread != null) {
             currentTime = System.nanoTime();
             delta += (currentTime - lastTime) / drawInterval;
-            timer += (currentTime - lastTime);
+
             lastTime = currentTime;
 
             // Update the game logic when enough time has passed for a frame
             if (delta >= 1.0) {
                 revalidate();
                 repaint();
-                idle();
 
+                if (cnt % 100 == 0) {
+                    color = generateRainbowSequenceColor();
+                }
+                cnt++;
                 delta--;
-                drawCount++;
             }
-
-            // Calculate the time to sleep in order to achieve the desired frame rate
-            long sleepTime = (long) (drawInterval - (System.nanoTime() - currentTime));
-
-            // if (sleepTime > 0) {
-            // try {
-            // Thread.sleep(sleepTime / 1000000); // Convert nanoseconds to milliseconds
-            // } catch (InterruptedException e) {
-            // e.printStackTrace();
-            // }
-            // }
-
-            if (timer >= 1000000000) {
-                System.out.println("FPS: " + drawCount);
-                drawCount = 0;
-                timer = 0;
-            }
-
         }
     }
-
-    Point3D camera = new Point3D(0, 600, -100);
 
     @Override
     protected void paintComponent(Graphics graphics) {
         super.paintComponent(graphics);
 
-        // System.out.println(clothSolver.averageZ);
-
         Graphics2D g = (Graphics2D) graphics;
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g.setStroke(new BasicStroke(1));
 
-        // draw cloth
-        // g.setColor(new Color(0.5f, 0.5f, 0.5f));
-        // g.fillPolygon(cloth.getXarr(), cloth.getYarr(), cloth.externalPoints.size());
-        int shade = 50;
-        double distance = 0;
+        // g.setStroke(new BasicStroke(1));
 
+        int shade = 0;
         for (int i = 0; i < cloth.rows; i++) {
             for (int j = 0; j < cloth.cols; j++) {
 
@@ -159,90 +117,79 @@ public class Panel extends JPanel implements Runnable, Config {
                 int[] yPoints = { (int) p.position.y, (int) p2.position.y, (int) p4.position.y,
                         (int) p3.position.y };
 
-                // double shift = PANEL_WIDTH / 2 + 350;
+                int[] zPoints = { (int) (p.position.z + shift), (int) (p2.position.z +
+                        shift), (int) (p4.position.z + shift), (int) (p3.position.z + shift) };
 
-                // int[] zPoints = { (int) (p.position.z + shift), (int) (p2.position.z +
-                // shift), (int) (p4.position.z + shift), (int) (p3.position.z + shift) };
+                // double avgY = (p.position.y + p2.position.y + p3.position.y + p4.position.y)
+                // / 4;
 
-                double avgY = (p.position.y + p2.position.y + p3.position.y + p4.position.y) / 4;
-
-                double avgZ = (p.position.z + p2.position.z + p3.position.z + p4.position.z) / 4;
+                // double avgZ = (p.position.z + p2.position.z + p3.position.z + p4.position.z)
+                // / 4;
 
                 shade = 0;
-                Line2D.Double line = new Line2D.Double(p.position.x,
-                        p.position.y, p2.position.x, p2.position.y);
 
-                Line2D line2 = new Line2D.Double(p3.position.x,
-                        p3.position.y, p.position.x, p.position.y);
+                // vector from camera to to point 1 on the plane = p - camera
 
-                // calculation of distance from camera to point
-                distance = camera.distance(new Point3D(0, avgY, avgZ));
+                Vector3D v = p.position.sub(camera);
+                // v.normalize();
+                Vector3D v1 = p2.position.sub(p.position);
+                Vector3D v2 = p3.position.sub(p.position);
 
-                // the less the distance, the darker the rgb value from 0 to 255
+                // v1.normalize();
+                // v2.normalize();
 
-                shade = (int) (distance);
+                Vector3D normal = v1.cross(v2); // normal vector of plane
 
-                if (shade >= 255) {
-                    shade = 255;
-                } else if (shade <= 10) {
-                    shade = 10;
+                normal.normalize();
+
+                // reflect vector from camera to point across normal
+
+                Vector3D reflected = v.subV(normal.scaleV(2 * v.dot(normal)));
+
+                // calculate the angle between the reflected vector and the vector from the
+                // camera to the light source
+
+                double reflectedLength = reflected.distance();
+                double lightLength = light.distance();
+
+                if (reflectedLength > 0 && lightLength > 0) {
+                    double cosAngle = reflected.dot(light) / (reflectedLength * lightLength);
+                    cosAngle = Math.max(-1.0, Math.min(1.0, cosAngle)); // Clamp the value to[-1, 1] to handle precision
+                                                                        // issues.
+                    double angle = Math.acos(cosAngle);
+                    shade = (int) Math.round(angle * 255 / Math.PI);
+
+                    // scale based on distance from camera
+                    double distance = p.position.distance(camera);
+
+                    shade = (int) (shade * (1 - distance / 1000));
+                    g.setColor(new Color((int) (color.getRed() * angle / Math.PI),
+                            (int) (color.getGreen() * angle / Math.PI), (int) (color.getBlue() * angle / Math.PI)));
+                } else {
+                    // Handle division by zero or other exceptional cases.
+                    shade = 0; // Set a default shade or handle the error as appropriate.
+                    g.setColor(new Color(shade, shade, shade));
                 }
-
-                // g.setColor(new Color(mapToGrayscale(distance), 1.0f, 1.0f));
-
-                g.setColor(new Color(shade, shade, shade));
-
-                // g.setColor(new Color((int) (distance % 255), (int) (distance % 255), (int)
-                // (distance % 255)));
-
-                // g.setColor(new Color((float) Math.abs(averageZ * 2), (float)
-                // Math.abs(averageZ * 2),
-                // (float) Math.abs(averageZ * 2)));
 
                 Polygon points = new Polygon(xPoints, yPoints, 4);
 
                 // Polygon points2 = new Polygon(zPoints, yPoints, 4);
                 // g.fill(points2);
+
                 g.fill(points);
-                g.draw(line);
-                // g.draw(line2);
-
-                Vector3D v1 = p2.position.sub(p.position);
-                Vector3D v2 = p3.position.sub(p.position);
-                Vector3D normal = v1.cross(v2);
-
-                // reflect vector from camera to point across normal
-
-                Vector3D reflected = camera.sub(p.position);
 
             }
         }
 
-        // int i = cloth.rows / 2;
-        // int j = cloth.cols / 2;
+        // g.setColor(new Color(255, 255, 255, 50));
+        // for (Point p : cloth.points) {
+        // Ellipse2D.Double points = new Ellipse2D.Double(p.position.x - 1.0,
+        // p.position.y - 1.0, 2, 2);
+        // g.fill(points);
+        // }
 
-        // Point p = cloth.points.get(i * cloth.cols + j);
-        // // get the point in the row below
-        // Point p2 = cloth.points.get((i + 1) * cloth.cols + j);
-        // // get the point in the column to the right
-        // Point p3 = cloth.points.get(i * cloth.cols + j + 1);
-        // // get the point in the row below and column to the right
-        // Point p4 = cloth.points.get((i + 1) * cloth.cols + j + 1);
-
-        // averageZ = (p.position.z + p2.position.z + p3.position.z + p4.position.z) /
-        // 4;
-
-        // System.out.println(distance);
-        // draw points
-
-        g.setColor(new Color(255, 255, 255, 60));
-        for (Point p : cloth.points) {
-            Ellipse2D.Double points = new Ellipse2D.Double(p.position.x - 2.5, p.position.y - 2.5, 5, 5);
-            g.fill(points);
-        }
-
-        // // draw springs
-        g.setColor(new Color(255, 255, 255, 20));
+        // // // draw springs
+        // g.setColor(new Color(255, 255, 255, 20));
 
         // for (Spring s : cloth.springs) {
 
@@ -254,13 +201,17 @@ public class Panel extends JPanel implements Runnable, Config {
 
     }
 
-    public static float mapToGrayscale(double value) {
+    public Color generateRainbowSequenceColor() {
+        // Generate a random hue in the range of 0.0 to 1.0 (representing the entire
+        // color spectrum)
+        float hue = (count % 5000) / 5000.0f;
 
-        // Ensure that the input value is within the desired range
-        float f = (float) ((value) / 20);
+        // Set saturation and lightness to create vibrant colors
+        float saturation = 1.0f; // Full saturation
+        float lightness = 1.0f; // You can adjust lightness as needed
 
-        // Ensure the grayscale value is within the valid range [0.0f, 1.0f]
-        return (float) Math.max(0.0, Math.min(1.0, f));
+        count++;
+        // Convert HSL color to RGB
+        return Color.getHSBColor(hue, saturation, lightness);
     }
-
 }

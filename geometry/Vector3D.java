@@ -54,6 +54,10 @@ public class Vector3D {
         this.z -= v.z;
     }
 
+    public Vector3D subV(Vector3D v) {
+        return new Vector3D(this.x - v.x, this.y - v.y, this.z - v.z);
+    }
+
     public void sub(double x, double y, double z) {
         this.x -= x;
         this.y -= y;
@@ -81,6 +85,15 @@ public class Vector3D {
         this.z *= s;
     }
 
+    // scale
+    public Vector3D scaleV(double s) {
+        this.x *= s;
+        this.y *= s;
+        this.z *= s;
+
+        return this;
+    }
+
     public void divide(double s) {
         this.x /= s;
         this.y /= s;
@@ -106,5 +119,10 @@ public class Vector3D {
         double z = this.x * v.y - this.y * v.x;
 
         return new Vector3D(x, y, z);
+    }
+
+    // dot product
+    public double dot(Vector3D v) {
+        return this.x * v.x + this.y * v.y + this.z * v.z;
     }
 }
