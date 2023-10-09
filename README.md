@@ -8,3 +8,9 @@
   - The project was just my first experimentation with 3D physyics after I had spent the last year doing 2D physics projects. I have not made any efforts to optimize this, and I am aware that it is very slow.
 
 ## DEMO
+
+![Demo](demo/gray.gif)
+
+![Demo](demo/1.gif)
+
+![Demo](demo/sideAndFront.gif)

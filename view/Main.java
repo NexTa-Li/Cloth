@@ -17,7 +17,7 @@ public class Main implements Runnable, Config {
 
     public Thread thread;
     public Vector3D light = new Vector3D(sx + (restLength * cols), (sx + rows * restLength), 15000);
-    public Point3D camera = new Point3D(PANEL_WIDTH / 2, PANEL_HEIGHT / 2, -556); // min z = 255;
+    public Point3D camera = new Point3D(PANEL_WIDTH / 2, PANEL_HEIGHT / 2, -500); // min z = 255;
 
     public Main() {
 
@@ -48,12 +48,12 @@ public class Main implements Runnable, Config {
                 z = -0.0;
                 target = 400;
             } else {
-                x = Math.random() * 6.0;
+                x = 0;
                 y = Math.random() * 6.0;
                 z = Math.random() * 20.0;
             }
 
-            multiplier *= -1;
+            // multiplier *= -1;
             x *= multiplier;
             z *= multiplier;
             y *= multiplier;
