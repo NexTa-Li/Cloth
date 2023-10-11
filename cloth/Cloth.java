@@ -11,7 +11,7 @@ public class Cloth {
     // maybe change to Lists
     public List<Point> points;
     public List<Integer> externalPoints;
-    public List<Spring> springs;
+    public List<Segment> springs;
 
     public double ks; // spring constant
     public double kd; // damping constant
@@ -25,7 +25,7 @@ public class Cloth {
 
         this.points = new ArrayList<Point>();
         this.externalPoints = new ArrayList<>();
-        this.springs = new ArrayList<Spring>();
+        this.springs = new ArrayList<Segment>();
         createCloth(x, y);
     }
 
@@ -45,7 +45,7 @@ public class Cloth {
                 // p.pinned = true;
                 // }
 
-                if (i == 0 && j == 0 || i == 0 && j == cols - 1) {// || i == 0 && j == cols / 2
+                if (i == 0 && j == 0 || i == 0 && j == cols - 1) {//
                     //
                     p.pinned = true;
                 }
@@ -62,13 +62,13 @@ public class Cloth {
 
                 // horizontal structural springs
                 if (j > 0) {
-                    Spring s = new Spring(i * cols + j, i * cols + j - 1, restLength);
+                    Segment s = new Segment(i * cols + j, i * cols + j - 1, restLength);
                     springs.add(s);
                 }
 
                 // vertical structural springs
                 if (i > 0) {
-                    Spring s = new Spring(i * cols + j, (i - 1) * cols + j, restLength);
+                    Segment s = new Segment(i * cols + j, (i - 1) * cols + j, restLength);
                     springs.add(s);
                 }
             }
@@ -129,13 +129,13 @@ public class Cloth {
 
                 // horizontal structural springs
                 if (j > 0) {
-                    Spring s = new Spring(i * cols + j, i * cols + j - 1, restLength);
+                    Segment s = new Segment(i * cols + j, i * cols + j - 1, restLength);
                     springs.add(s);
                 }
 
                 // vertical structural springs
                 if (i > 0) {
-                    Spring s = new Spring(i * cols + j, (i - 1) * cols + j, restLength);
+                    Segment s = new Segment(i * cols + j, (i - 1) * cols + j, restLength);
                     springs.add(s);
                 }
             }

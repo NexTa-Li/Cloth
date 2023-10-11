@@ -9,9 +9,9 @@ public class Main implements Runnable, Config {
     public Cloth cloth;
     ClothSolver clothSolver;
 
-    public int rows = 120;
-    public int cols = 180;
-    public int restLength = 2;
+    public int rows = 170;
+    public int cols = 170;
+    public int restLength = 4;
     public int sx = PANEL_WIDTH / 2 - (cols * restLength) / 2;
     public int sy = PANEL_HEIGHT / 2 - (rows * restLength) / 2;
 
@@ -37,27 +37,27 @@ public class Main implements Runnable, Config {
 
     void idle() {
 
-        if (count == target) {
+        // if (count == target) {
 
-            count = 0;
-            target = (int) (Math.random() * 250 + 500);
+        // count = 0;
+        // target = (int) (Math.random() * 250 + 500);
 
-            if (y != 0) {
-                x = 0.00;
-                y = 0.0;
-                z = -0.0;
-                target = 400;
-            } else {
-                x = 0;
-                y = Math.random() * 6.0;
-                z = Math.random() * 20.0;
-            }
+        // if (y != 0) {
+        // x = 0.00;
+        // y = 0.0;
+        // z = -0.0;
+        // target = 400;
+        // } else {
+        // x = Math.random() * 2.0 - 1;
+        // y = Math.random() * 2.0 - 1;
+        // z = Math.random() * 2.0 - 1;
+        // }
 
-            // multiplier *= -1;
-            x *= multiplier;
-            z *= multiplier;
-            y *= multiplier;
-        }
+        // multiplier *= -1;
+        // x *= multiplier;
+        // z *= multiplier;
+        // y *= multiplier;
+        // }
 
         Vector3D wind = new Vector3D(x, y, z);
         // clothSolver.accelerate(new Vector3D(x, 0, 0));

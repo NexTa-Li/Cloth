@@ -65,4 +65,10 @@ public class Point3D {
     public double distance(Point3D p) {
         return (double) Math.sqrt(distanceSq(p));
     }
+
+    public String toString() {
+        // return String.format("Point3D(%f, %f, %f)", this.x, this.y, this.z);
+        // 2 decimal places
+        return String.format("Point3D(%.2f, %.2f, %.2f)", this.x, this.y, this.z);
+    }
 }
