@@ -7,6 +7,12 @@
 - I put this together over a 2 day period, under a huge time pressure. I don't intend to clean it up right now, but I may in the future.
   - The project was just my first experimentation with 3D physyics after I had spent the last year doing 2D physics projects. I have not made any efforts to optimize this, and I am aware that it is very slow.
 
+todo:
+
+occlusion culling
+painters/ reverse painters
+fix ray tracing
+
 ## DEMO
 
 ![Demo](demo/gray.gif)
